@@ -45,17 +45,6 @@
             overflow: hidden;
         }
 
-        .floating-item {
-            position: absolute;
-            animation: float 6s ease-in-out infinite;
-            font-size: 30px;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
         .market-stalls {
             display: flex;
             justify-content: space-around;
@@ -292,27 +281,6 @@
         }
 
         /* Distortion effects */
-        .blur { filter: blur(4px); }
-        .dark { filter: brightness(0.3) contrast(1.5); }
-        .pixelated { 
-            filter: blur(1px);
-            image-rendering: pixelated;
-            transform: scale(0.8);
-        }
-        .rotated { transform: rotate(15deg); filter: blur(1px); }
-        .shadow { 
-            filter: drop-shadow(20px 20px 10px rgba(0,0,0,0.8)) brightness(0.6); 
-        }
-        .oversaturated { filter: saturate(3) hue-rotate(30deg) blur(2px); }
-        .cropped { 
-            clip-path: circle(60% at 30% 30%); 
-            filter: blur(1px);
-        }
-        .noisy { 
-            filter: contrast(1.5) brightness(0.8) blur(2px); 
-            position: relative;
-        }
-
         .popup {
             position: fixed;
             top: 0;
@@ -532,11 +500,6 @@
 
     <!-- Next Game Screen -->
     <div class="screen" id="next-game">
-        <div class="market-decoration">
-            <div class="floating-item" style="top: 10%; left: 10%; animation-delay: 0s;">🍎</div>
-            <div class="floating-item" style="top: 20%; right: 15%; animation-delay: 1s;">🥕</div>
-            <div class="floating-item" style="top: 15%; left: 60%; animation-delay: 2s;">🍞</div>
-        </div>
         
         <div class="container">
             <div class="welcome-box">
@@ -561,19 +524,19 @@
         </div>
     </div>
 
-    <script>
-        // Game data
+      <script>
+        // Game data - using exact filenames from your GitHub
         const foodItems = [
-            { id: 'apple', category: 'fruits', name: 'Apfel', hasBlurred: true },
-            { id: 'birne', category: 'fruits', name: 'Birne', hasBlurred: true },
-            { id: 'erdbeere', category: 'fruits', name: 'Erdbeere', hasBlurred: false },
-            { id: 'kartoffel', category: 'vegetables', name: 'Kartoffel', hasBlurred: true },
-            { id: 'kuerbis', category: 'vegetables', name: 'Kürbis', hasBlurred: true },
-            { id: 'tomate', category: 'vegetables', name: 'Tomate', hasBlurred: true },
-            { id: 'broccoli', category: 'vegetables', name: 'Broccoli', hasBlurred: false },
-            { id: 'broetli', category: 'other', name: 'Brötli', hasBlurred: true },
-            { id: 'eier', category: 'other', name: 'Eier', hasBlurred: true },
-            { id: 'kaese', category: 'other', name: 'Käse', hasBlurred: false }
+            { id: 'Apfel', category: 'fruits', name: 'Apfel', hasBlurred: true },
+            { id: 'Birne', category: 'fruits', name: 'Birne', hasBlurred: true },
+            { id: 'Erdbeere', category: 'fruits', name: 'Erdbeere', hasBlurred: false },
+            { id: 'Kartoffel', category: 'vegetables', name: 'Kartoffel', hasBlurred: true },
+            { id: 'Kuerbis', category: 'vegetables', name: 'Kürbis', hasBlurred: true },
+            { id: 'Tomate', category: 'vegetables', name: 'Tomate', hasBlurred: true },
+            { id: 'Broccoli', category: 'vegetables', name: 'Broccoli', hasBlurred: false },
+            { id: 'Broetli', category: 'other', name: 'Brötli', hasBlurred: true },
+            { id: 'Eier', category: 'other', name: 'Eier', hasBlurred: true },
+            { id: 'Kaese', category: 'other', name: 'Käse', hasBlurred: false }
         ];
 
         let gameState = {
@@ -648,7 +611,7 @@
                 itemElement.draggable = true;
                 itemElement.dataset.itemId = item.id;
                 
-                // Create image element
+                // Create image element - show blurred version during game
                 const img = document.createElement('img');
                 img.src = item.hasBlurred ? `images/${item.id}-blurred.png` : `images/${item.id}.png`;
                 img.alt = item.name;
@@ -874,11 +837,11 @@ Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie e
             const isSharp = itemElement.dataset.sharp === 'true';
             
             if (isSharp) {
-                // Make blurry again
+                // Switch back to blurred image
                 img.src = `images/${itemId}-blurred.png`;
                 itemElement.dataset.sharp = 'false';
             } else {
-                // Make sharp
+                // Switch to sharp image
                 img.src = `images/${itemId}.png`;
                 itemElement.dataset.sharp = 'true';
             }
