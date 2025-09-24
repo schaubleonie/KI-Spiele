@@ -484,7 +484,7 @@
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
-                <p id="progress-text">0 / 8 Bilder sortiert</p>
+                <p id="progress-text">0 / 10 Bilder sortiert</p>
 
                 <div class="baskets-container">
                     <div class="basket" data-category="fruits">
@@ -537,7 +537,7 @@
         <div class="container">
             <div class="game-container">
                 <h2 style="color: #2c5530;">Deine Ergebnisse</h2>
-                <p style="color: #666; margin-bottom: 20px;">Klicke auf die Bilder, um sie scharf zu sehen</p>
+                <p style="color: #666; margin-bottom: 20px;">Klicke auf die unscharfen Bilder, um sie scharf zu sehen</p>
                 <div class="items-grid" id="review-grid"></div>
                 <button class="btn" id="go-to-next" style="margin-top: 30px;">Weiter</button>
             </div>
@@ -578,14 +578,16 @@
     <script>
         // Game data
         const foodItems = [
-            { id: 'apple', emoji: '🍎', category: 'fruits', name: 'Apfel', distortion: 'blur' },
-            { id: 'carrot', emoji: '🥕', category: 'vegetables', name: 'Karotte', distortion: 'dark' },
-            { id: 'bread', emoji: '🍞', category: 'other', name: 'Brot', distortion: 'pixelated' },
-            { id: 'banana', emoji: '🍌', category: 'fruits', name: 'Banane', distortion: 'rotated' },
-            { id: 'broccoli', emoji: '🥦', category: 'vegetables', name: 'Brokkoli', distortion: 'shadow' },
-            { id: 'milk', emoji: '🥛', category: 'other', name: 'Milch', distortion: 'oversaturated' },
-            { id: 'tomato', emoji: '🍅', category: 'vegetables', name: 'Tomate', distortion: 'cropped' },
-            { id: 'cheese', emoji: '🧀', category: 'other', name: 'Käse', distortion: 'noisy' }
+            { id: 'apple', category: 'fruits', name: 'Apfel', hasBlurred: true },
+            { id: 'birne', category: 'fruits', name: 'Birne', hasBlurred: true },
+            { id: 'erdbeere', category: 'fruits', name: 'Erdbeere', hasBlurred: false },
+            { id: 'kartoffel', category: 'vegetables', name: 'Kartoffel', hasBlurred: true },
+            { id: 'kuerbis', category: 'vegetables', name: 'Kürbis', hasBlurred: true },
+            { id: 'tomate', category: 'vegetables', name: 'Tomate', hasBlurred: true },
+            { id: 'broccoli', category: 'vegetables', name: 'Broccoli', hasBlurred: false },
+            { id: 'broetli', category: 'other', name: 'Brötli', hasBlurred: true },
+            { id: 'eier', category: 'other', name: 'Eier', hasBlurred: true },
+            { id: 'kaese', category: 'other', name: 'Käse', hasBlurred: false }
         ];
 
         let gameState = {
@@ -656,12 +658,20 @@
             
             gameState.currentItems.forEach(item => {
                 const itemElement = document.createElement('div');
-                itemElement.className = `food-item ${item.distortion}`;
+                itemElement.className = 'food-item';
                 itemElement.draggable = true;
                 itemElement.dataset.itemId = item.id;
-                itemElement.textContent = item.emoji;
-                itemElement.style.background = `linear-gradient(135deg, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)})`;
                 
+                // Create image element
+                const img = document.createElement('img');
+                img.src = item.hasBlurred ? `images/${item.id}-blurred.png` : `images/${item.id}.png`;
+                img.alt = item.name;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '15px';
+                
+                itemElement.appendChild(img);
                 container.appendChild(itemElement);
             });
         }
@@ -824,20 +834,42 @@ Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie e
                 
                 const itemContainer = document.createElement('div');
                 itemContainer.className = 'item-review';
-                itemContainer.onclick = () => toggleItemClarity(item.id);
+                if (item.hasBlurred) {
+                    itemContainer.onclick = () => toggleItemClarity(item.id);
+                    itemContainer.style.cursor = 'pointer';
+                }
                 
                 const itemElement = document.createElement('div');
-                itemElement.className = `food-item ${item.distortion} ${isCorrect ? 'correct' : 'incorrect'}`;
+                itemElement.className = `food-item ${isCorrect ? 'correct' : 'incorrect'}`;
                 itemElement.dataset.itemId = item.id;
                 itemElement.dataset.sharp = 'false';
-                itemElement.textContent = item.emoji;
-                itemElement.style.background = `linear-gradient(135deg, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)})`;
+                
+                // Create image element
+                const img = document.createElement('img');
+                img.src = item.hasBlurred ? `images/${item.id}-blurred.png` : `images/${item.id}.png`;
+                img.alt = item.name;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '15px';
+                
+                itemElement.appendChild(img);
                 
                 const label = document.createElement('p');
                 label.textContent = `${item.name} → ${getCategoryName(playerAnswer)}`;
                 label.style.fontSize = '0.8em';
                 label.style.marginTop = '5px';
                 label.style.color = isCorrect ? '#4CAF50' : '#f44336';
+                
+                // Add hint for items without blur
+                if (!item.hasBlurred) {
+                    const hint = document.createElement('p');
+                    hint.textContent = '(immer scharf)';
+                    hint.style.fontSize = '0.7em';
+                    hint.style.color = '#666';
+                    hint.style.fontStyle = 'italic';
+                    itemContainer.appendChild(hint);
+                }
                 
                 itemContainer.appendChild(itemElement);
                 itemContainer.appendChild(label);
@@ -848,20 +880,20 @@ Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie e
         }
 
         function toggleItemClarity(itemId) {
+            const item = foodItems.find(i => i.id === itemId);
+            if (!item.hasBlurred) return; // Can't toggle items that don't have blurred version
+            
             const itemElement = document.querySelector(`#review-grid [data-item-id="${itemId}"]`);
+            const img = itemElement.querySelector('img');
             const isSharp = itemElement.dataset.sharp === 'true';
             
             if (isSharp) {
                 // Make blurry again
-                const item = foodItems.find(i => i.id === itemId);
-                itemElement.className = itemElement.className.replace(' sharp', '');
-                itemElement.classList.add(item.distortion);
+                img.src = `images/${itemId}-blurred.png`;
                 itemElement.dataset.sharp = 'false';
             } else {
                 // Make sharp
-                const item = foodItems.find(i => i.id === itemId);
-                itemElement.classList.remove(item.distortion);
-                itemElement.classList.add('sharp');
+                img.src = `images/${itemId}.png`;
                 itemElement.dataset.sharp = 'true';
             }
         }
