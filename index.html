@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KI Spiele - Markthalle Basel</title>
+    <title>KI für Neulinge - Markthalle Basel</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,6 +14,11 @@
             <div class="stall"></div>
             <div class="stall"></div>
             <div class="stall"></div>
+        </div>
+
+        <div class="footer">
+            <span>KI spielerisch lernen | AI Open House @Markthalle Basel | September 2025 | by Léonie Schaub</span>
+            <div class="info-icon" onclick="showAIPopup()">i</div>
         </div>
 
         <div class="container">
@@ -28,5 +34,35 @@ Im Quiz „Wer wird KI-Profi?“ kannst du anschliessend dein Wissen vertiefen u
             </div>
         </div>
     </div>
+<!-- AI Declaration Popup -->
+    <div class="ai-popup" id="ai-popup">
+        <div class="ai-popup-content">
+            <button class="close-popup" onclick="hideAIPopup()">&times;</button>
+            <h3>KI-Deklaration</h3>
+            <p>Zur Erstellung dieser Spiele wurden verschiedene KI-Tools verwendet:</p>
+            <ul>
+                <li>Claude AI für Coding</li>
+                <li>ChatGPT zur Bildgenerierung und Textkorrektur</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function showAIPopup() {
+            document.getElementById('ai-popup').classList.add('active');
+        }
+
+        function hideAIPopup() {
+            document.getElementById('ai-popup').classList.remove('active');
+        }
+
+        // Close popup when clicking outside
+        document.addEventListener('click', function(e) {
+            const popup = document.getElementById('ai-popup');
+            if (e.target === popup) {
+                hideAIPopup();
+            }
+        });
+    </script>
 </body>
 </html>
