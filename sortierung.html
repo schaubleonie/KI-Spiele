@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marktvorbereitung - KI für Neulinge</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Game Intro -->
+    <div class="screen active" id="game-intro">
+        <button class="btn back-btn" onclick="window.location.href='index.html'">← Zurück</button>
+        <div class="container">
+            <div class="game-container">
+                <div class="market-frame">
+                    <h2 style="color: #2c5530; margin-bottom: 20px;">Willkommen in der Markthalle</h2>
+                    <p style="font-size: 1.1em; line-height: 1.6; color: #333;">
+                        Ein Ort für Inspiration, Genuss und Austausch.<br><br>
+                        Heute morgen sind die Händler etwas durcheinandergeraten und haben die Lebensmittel falsch einsortiert.<br><br>
+                        Hilf ihnen, die Früchte, das Gemüse und die restlichen Lebensmittel wieder richtig zu sortieren.
+                    </p>
+                    <button class="btn" onclick="startGame()" style="margin-top: 20px;">Spiel starten</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Play -->
+    <div class="screen" id="game-play">
+        <button class="btn back-btn" onclick="showScreen('game-intro')">← Zurück</button>
+        <div class="container">
+            <div class="game-container">
+                <h2 style="color: #2c5530;">Marktvorbereitung</h2>
+                <p style="color: #666; margin-bottom: 20px;">Sortiere die Lebensmittel per Drag & Drop in die richtigen Körbe.</p>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p id="progress-text">0 / 10 Bilder sortiert</p>
+
+                <div class="baskets-container">
+                    <div class="basket" data-category="fruits">
+                        <div class="basket-items" id="fruits-items"></div>
+                        <div class="basket-label">Früchte</div>
+                    </div>
+                    <div class="basket" data-category="vegetables">
+                        <div class="basket-items" id="vegetables-items"></div>
+                        <div class="basket-label">Gemüse</div>
+                    </div>
+                    <div class="basket" data-category="other">
+                        <div class="basket-items" id="other-items"></div>
+                        <div class="basket-label">Andere Lebensmittel</div>
+                    </div>
+                </div>
+
+                <div class="items-to-sort" id="items-to-sort"></div>
+
+                <button class="btn" id="finish-btn" style="display: none; margin-top: 20px;">Fertig</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Difficulty Popup -->
+    <div class="popup" id="difficulty-popup">
+        <div class="popup-content">
+            <h3>Ist dir die Zuordnung der Bilder leicht gefallen?</h3>
+            <div class="button-group" style="margin-top: 20px;">
+                <button class="btn" id="easy-btn">Ja</button>
+                <button class="btn secondary" id="hard-btn">Nein</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="screen" id="result-screen">
+        <button class="btn back-btn" onclick="showScreen('game-play')">← Zurück</button>
+        <div class="container">
+            <div class="game-container">
+                <div class="result-percentage" id="result-percentage"></div>
+                <div class="result-text" id="result-text"></div>
+                <button class="btn" onclick="showReviewScreen()" style="margin-top: 30px;">Zuordnung ansehen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Screen -->
+    <div class="screen" id="review-screen">
+        <button class="btn back-btn" onclick="showScreen('result-screen')">← Zurück</button>
+        <div class="container">
+            <div class="game-container">
+                <h2 style="color: #2c5530;">Deine Ergebnisse</h2>
+                <p style="color: #666; margin-bottom: 20px;">Klicke auf die unscharfen Bilder, um sie scharf zu sehen</p>
+                <div class="items-grid" id="review-grid"></div>
+                <button class="btn" onclick="showScreen('next-game')" style="margin-top: 30px;">Weiter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Game Screen -->
+    <div class="screen" id="next-game">
+        <div class="container">
+            <div class="welcome-box">
+                <h2 style="color: #2c5530; margin-bottom: 30px;">Bist du bereit für die nächste Station?</h2>
+                <div class="button-group">
+                    <button class="btn" onclick="window.location.href='quiz.html'">Wer wird KI-Profi?</button>
+                    <button class="btn secondary" onclick="window.location.href='index.html'">Zurück zum Start</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game data - using exact filenames from your GitHub
+        const foodItems = [
+            { id: 'Apfel', category: 'fruits', name: 'Apfel', hasBlurred: true },
+            { id: 'Birne', category: 'fruits', name: 'Birne', hasBlurred: true },
+            { id: 'Erdbeere', category: 'fruits', name: 'Erdbeere', hasBlurred: false },
+            { id: 'Kartoffel', category: 'vegetables', name: 'Kartoffel', hasBlurred: true },
+            { id: 'Kuerbis', category: 'vegetables', name: 'Kürbis', hasBlurred: true },
+            { id: 'Tomate', category: 'vegetables', name: 'Tomate', hasBlurred: true },
+            { id: 'Broccoli', category: 'vegetables', name: 'Broccoli', hasBlurred: false },
+            { id: 'Broetli', category: 'other', name: 'Brötli', hasBlurred: true },
+            { id: 'Eier', category: 'other', name: 'Eier', hasBlurred: true },
+            { id: 'Kaese', category: 'other', name: 'Käse', hasBlurred: false }
+        ];
+
+        let gameState = {
+            currentItems: [],
+            playerAnswers: {},
+            itemsPlaced: 0,
+            isEasy: true
+        };
+
+        // Screen management
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Event listeners for navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game controls
+            document.getElementById('finish-btn').addEventListener('click', askDifficulty);
+            document.getElementById('easy-btn').addEventListener('click', () => showResult(true));
+            document.getElementById('hard-btn').addEventListener('click', () => showResult(false));
+        });
+
+        // Start game
+        function startGame() {
+            try {
+                gameState.currentItems = [...foodItems];
+                gameState.playerAnswers = {};
+                gameState.itemsPlaced = 0;
+                
+                showScreen('game-play');
+                
+                // Clear previous items
+                document.getElementById('items-to-sort').innerHTML = '';
+                document.getElementById('fruits-items').innerHTML = '';
+                document.getElementById('vegetables-items').innerHTML = '';
+                document.getElementById('other-items').innerHTML = '';
+                
+                renderItems();
+                updateProgress();
+                setupDragAndDrop();
+                
+                // Hide finish button
+                document.getElementById('finish-btn').style.display = 'none';
+            } catch (error) {
+                console.error('Error starting game:', error);
+                alert('Fehler beim Starten des Spiels. Bitte versuche es erneut.');
+            }
+        }
+
+        // Render items to sort
+        function renderItems() {
+            const container = document.getElementById('items-to-sort');
+            container.innerHTML = '';
+            
+            gameState.currentItems.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'food-item';
+                itemElement.draggable = true;
+                itemElement.dataset.itemId = item.id;
+                
+                // Create image element - show blurred version during game
+                const img = document.createElement('img');
+                img.src = item.hasBlurred ? `images/${item.id}-blurred.png` : `images/${item.id}.png`;
+                img.alt = item.name;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '15px';
+                img.draggable = false; // Prevent image from being draggable separately
+                img.style.pointerEvents = 'none'; // Let events pass through to parent div
+                
+                itemElement.appendChild(img);
+                container.appendChild(itemElement);
+            });
+        }
+
+        // Setup drag and drop
+        function setupDragAndDrop() {
+            setTimeout(() => {
+                document.querySelectorAll('.food-item:not(.in-basket)').forEach(item => {
+                    item.addEventListener('dragstart', handleDragStart);
+                });
+
+                document.querySelectorAll('.basket').forEach(basket => {
+                    basket.addEventListener('dragover', handleDragOver);
+                    basket.addEventListener('drop', handleDrop);
+                    basket.addEventListener('dragenter', handleDragEnter);
+                    basket.addEventListener('dragleave', handleDragLeave);
+                });
+            }, 100);
+        }
+
+        function handleDragStart(e) {
+            // Check if we're dragging the container or the image inside
+            const itemId = e.target.dataset.itemId || e.target.parentElement.dataset.itemId;
+            e.dataTransfer.setData('text/plain', itemId);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const itemId = e.dataTransfer.getData('text/plain');
+            const category = e.currentTarget.dataset.category;
+            const item = foodItems.find(i => i.id === itemId);
+            
+            if (!item) return;
+            
+            // Store player's answer
+            gameState.playerAnswers[itemId] = category;
+            
+            // Move item to basket
+            const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+            itemElement.classList.add('in-basket');
+            itemElement.draggable = false;
+            
+            const basketItems = document.getElementById(`${category}-items`);
+            basketItems.appendChild(itemElement);
+            
+            // Play sound effect
+            playDropSound();
+            
+            gameState.itemsPlaced++;
+            updateProgress();
+            
+            if (gameState.itemsPlaced === foodItems.length) {
+                document.getElementById('finish-btn').style.display = 'block';
+            }
+        }
+
+        function playDropSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (error) {
+                console.log('Audio not available');
+            }
+        }
+
+        function updateProgress() {
+            const percentage = (gameState.itemsPlaced / foodItems.length) * 100;
+            document.getElementById('progress-fill').style.width = percentage + '%';
+            document.getElementById('progress-text').textContent = `${gameState.itemsPlaced} / ${foodItems.length} Bilder sortiert`;
+        }
+
+        function askDifficulty() {
+            document.getElementById('difficulty-popup').classList.add('active');
+        }
+
+        function showResult(wasEasy) {
+            gameState.isEasy = wasEasy;
+            document.getElementById('difficulty-popup').classList.remove('active');
+            
+            // Calculate score
+            let correct = 0;
+            let total = foodItems.length;
+            
+            Object.keys(gameState.playerAnswers).forEach(itemId => {
+                const item = foodItems.find(i => i.id === itemId);
+                const playerAnswer = gameState.playerAnswers[itemId];
+                if (item.category === playerAnswer) {
+                    correct++;
+                }
+            });
+            
+            const percentage = Math.round((correct / total) * 100);
+            const isHighScore = percentage >= 80;
+            
+            document.getElementById('result-percentage').textContent = percentage + '%';
+            
+            // Generate result text based on difficulty and score
+            let resultText = '';
+            
+            if (wasEasy) {
+                if (isHighScore) {
+                    resultText = `Du hast fast alles korrekt erkannt! Das zeigt, wie stark die menschliche Mustererkennung ist. Unser Gehirn ergänzt fehlende Informationen automatisch und gleicht sie mit Erfahrungen ab.
+
+Für Künstliche Intelligenz ist das oft schwieriger. Sie erkennt Muster nur auf Basis der Daten, mit denen sie trainiert wurde. Wenn die Trainingsdaten lückenhaft, einseitig oder falsch sind, übernimmt die KI diese Fehler, denn sie hat kein Verständnis für den Inhalt.
+
+Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie er aussieht, dann würde sie ihn auch nicht erkennen.`;
+                } else {
+                    resultText = `Auch wenn du dein Bestes gegeben hast, haben sich ein paar Fehler eingeschlichen. Das passiert der Künstlichen Intelligenz auch.
+
+Wir Menschen erkennen Muster aufgrund von Erfahrungen und unser Gehirn ergänzt fehlende Informationen automatisch (manchmal auch falsch). So wird eine unscharfe Kartoffel vielleicht zu einer Birne.
+
+Für Künstliche Intelligenz ist das noch schwieriger. Sie erkennt Muster nur auf Basis der Daten, mit denen sie trainiert wurde. Wenn die Trainingsdaten lückenhaft, einseitig oder falsch sind, übernimmt die KI diese Fehler, denn sie hat kein Verständnis für den Inhalt.
+
+Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie er aussieht, dann würde sie ihn auch nicht erkennen.`;
+                }
+            } else {
+                resultText = `Keine Sorge, auch für KI ist das eine Herausforderung.
+
+Wenn Bilder unscharf oder ungenau sind, fällt es Algorithmen schwer, sie richtig zuzuordnen. Künstliche Intelligenz erkennt Muster nur auf Basis der Daten, mit denen sie trainiert wurde. Wenn die Trainingsdaten lückenhaft, einseitig oder falsch sind, übernimmt die KI diese Fehler, denn sie hat kein Verständnis für den Inhalt.
+
+Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie er aussieht, dann würde sie ihn auch nicht erkennen.`;
+            }
+            
+            document.getElementById('result-text').textContent = resultText;
+            showScreen('result-screen');
+        }
+
+        // Show review screen with correct/incorrect indicators
+        function showReviewScreen() {
+            const reviewGrid = document.getElementById('review-grid');
+            reviewGrid.innerHTML = '';
+            
+            foodItems.forEach(item => {
+                const playerAnswer = gameState.playerAnswers[item.id];
+                const isCorrect = playerAnswer === item.category;
+                
+                const itemContainer = document.createElement('div');
+                itemContainer.className = 'item-review';
+                if (item.hasBlurred) {
+                    itemContainer.onclick = () => toggleItemClarity(item.id);
+                    itemContainer.style.cursor = 'pointer';
+                }
+                
+                const itemElement = document.createElement('div');
+                itemElement.className = `food-item ${isCorrect ? 'correct' : 'incorrect'}`;
+                itemElement.dataset.itemId = item.id;
+                itemElement.dataset.sharp = 'false';
+                
+                // Create image element
+                const img = document.createElement('img');
+                img.src = item.hasBlurred ? `images/${item.id}-blurred.png` : `images/${item.id}.png`;
+                img.alt = item.name;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '15px';
+                
+                itemElement.appendChild(img);
+                
+                const label = document.createElement('p');
+                label.textContent = `${item.name} → ${getCategoryName(playerAnswer)}`;
+                label.style.fontSize = '0.8em';
+                label.style.marginTop = '5px';
+                label.style.color = isCorrect ? '#4CAF50' : '#f44336';
+                
+                // Add hint for items without blur
+                if (!item.hasBlurred) {
+                    const hint = document.createElement('p');
+                    hint.textContent = '(immer scharf)';
+                    hint.style.fontSize = '0.7em';
+                    hint.style.color = '#666';
+                    hint.style.fontStyle = 'italic';
+                    itemContainer.appendChild(hint);
+                }
+                
+                itemContainer.appendChild(itemElement);
+                itemContainer.appendChild(label);
+                reviewGrid.appendChild(itemContainer);
+            });
+            
+            showScreen('review-screen');
+        }
+
+        function toggleItemClarity(itemId) {
+            const item = foodItems.find(i => i.id === itemId);
+            if (!item.hasBlurred) return; // Can't toggle items that don't have blurred version
+            
+            const itemElement = document.querySelector(`#review-grid [data-item-id="${itemId}"]`);
+            const img = itemElement.querySelector('img');
+            const isSharp = itemElement.dataset.sharp === 'true';
+            
+            if (isSharp) {
+                // Switch back to blurred image
+                img.src = `images/${itemId}-blurred.png`;
+                itemElement.dataset.sharp = 'false';
+            } else {
+                // Switch to sharp image
+                img.src = `images/${itemId}.png`;
+                itemElement.dataset.sharp = 'true';
+            }
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'fruits': 'Früchte',
+                'vegetables': 'Gemüse',
+                'other': 'Andere Lebensmittel'
+            };
+            return names[category] || category;
+        }
+    </script>
+</body>
+</html>
