@@ -140,14 +140,20 @@ h1 {
 }
 
 .market-frame::before {
-    content: '🏪';
+    content: '';
     position: absolute;
-    top: -20px;
+    top: -25px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 40px;
-    background: white;
-    padding: 0 10px;
+    width: 50px;
+    height: 50px;
+    background-image: url('images/Stand.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
+    border-radius: 50%;
+    padding: 5px;
 }
 
 .progress-bar {
@@ -552,5 +558,15 @@ h1 {
 
     .container {
         max-width: 900px;
+    }
+
+    /* Mobile quiz layout */
+    #quiz-game .container > div {
+        flex-direction: column !important;
+    }
+    
+    .points-ladder {
+        max-width: none !important;
+        order: -1;
     }
 }
