@@ -662,54 +662,6 @@ h1 {
     }
     
     .points-ladder {
-        max-width: none !important;
-        order: -1;
-        padding: 10px;
-        margin: 10px 0;
-    }
-    
-    .points-ladder h3 {
-        display: none;
-    }
-    
-    .points-ladder #ladder-content {
-        display: flex;
-        overflow-x: auto;
-        gap: 5px;
-        padding: 5px 0;
-    }
-    
-    .points-ladder .ladder-item {
-        flex: 0 0 auto;
-        min-width: 80px;
-        padding: 5px 8px;
-        font-size: 0.8em;
-        text-align: center;
-        border-radius: 15px;
-        border: 2px solid #ddd;
-        background: white;
-        margin: 0;
-    }
-    
-    .points-ladder .ladder-item.current {
-        border-color: #4CAF50;
-        background: #4CAF50;
-        color: white;
-        transform: scale(1.1);
-    }
-    
-    .points-ladder .ladder-item.completed {
-        border-color: #4CAF50;
-        background: #e8f5e8;
-        color: #2c5530;
-    }
-    
-    .points-ladder .ladder-item span:first-child {
-        display: none;
-    }
-    
-    .points-ladder .ladder-item span:last-child {
-        font-size: 0.9em;
-        font-weight: bold;
+        display: none !important;
     }
 }
