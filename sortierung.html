@@ -227,16 +227,121 @@
         function setupDragAndDrop() {
             setTimeout(() => {
                 document.querySelectorAll('.food-item:not(.in-basket)').forEach(item => {
+                    // Desktop drag & drop
                     item.addEventListener('dragstart', handleDragStart);
+                    
+                    // Mobile touch events
+                    item.addEventListener('touchstart', handleTouchStart, { passive: false });
+                    item.addEventListener('touchmove', handleTouchMove, { passive: false });
+                    item.addEventListener('touchend', handleTouchEnd, { passive: false });
                 });
 
                 document.querySelectorAll('.basket').forEach(basket => {
+                    // Desktop events
                     basket.addEventListener('dragover', handleDragOver);
                     basket.addEventListener('drop', handleDrop);
                     basket.addEventListener('dragenter', handleDragEnter);
                     basket.addEventListener('dragleave', handleDragLeave);
                 });
             }, 100);
+        }
+
+        // Touch handling variables
+        let touchItem = null;
+        let touchOffset = { x: 0, y: 0 };
+        let ghostElement = null;
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            touchItem = e.currentTarget;
+            
+            const touch = e.touches[0];
+            const rect = touchItem.getBoundingClientRect();
+            touchOffset.x = touch.clientX - rect.left;
+            touchOffset.y = touch.clientY - rect.top;
+            
+            // Create ghost element for visual feedback
+            ghostElement = touchItem.cloneNode(true);
+            ghostElement.style.position = 'fixed';
+            ghostElement.style.pointerEvents = 'none';
+            ghostElement.style.opacity = '0.8';
+            ghostElement.style.zIndex = '1000';
+            ghostElement.style.transform = 'scale(1.1)';
+            document.body.appendChild(ghostElement);
+            
+            updateGhostPosition(touch.clientX, touch.clientY);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!touchItem || !ghostElement) return;
+            
+            const touch = e.touches[0];
+            updateGhostPosition(touch.clientX, touch.clientY);
+            
+            // Check for basket hover
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const basket = elementBelow ? elementBelow.closest('.basket') : null;
+            
+            // Update basket visual feedback
+            document.querySelectorAll('.basket').forEach(b => b.classList.remove('drag-over'));
+            if (basket) {
+                basket.classList.add('drag-over');
+            }
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (!touchItem) return;
+            
+            const touch = e.changedTouches[0];
+            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+            const basket = elementBelow ? elementBelow.closest('.basket') : null;
+            
+            // Clean up visual feedback
+            document.querySelectorAll('.basket').forEach(b => b.classList.remove('drag-over'));
+            if (ghostElement) {
+                document.body.removeChild(ghostElement);
+                ghostElement = null;
+            }
+            
+            // Handle drop
+            if (basket) {
+                const itemId = touchItem.dataset.itemId;
+                const category = basket.dataset.category;
+                const item = foodItems.find(i => i.id === itemId);
+                
+                if (item) {
+                    // Store player's answer
+                    gameState.playerAnswers[itemId] = category;
+                    
+                    // Move item to basket
+                    touchItem.classList.add('in-basket');
+                    touchItem.draggable = false;
+                    
+                    const basketItems = document.getElementById(`${category}-items`);
+                    basketItems.appendChild(touchItem);
+                    
+                    // Play sound effect
+                    playDropSound();
+                    
+                    gameState.itemsPlaced++;
+                    updateProgress();
+                    
+                    if (gameState.itemsPlaced === foodItems.length) {
+                        document.getElementById('finish-btn').style.display = 'block';
+                    }
+                }
+            }
+            
+            touchItem = null;
+        }
+
+        function updateGhostPosition(x, y) {
+            if (ghostElement) {
+                ghostElement.style.left = (x - touchOffset.x) + 'px';
+                ghostElement.style.top = (y - touchOffset.y) + 'px';
+            }
         }
 
         function handleDragStart(e) {
