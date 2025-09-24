@@ -94,18 +94,28 @@ body {
 
 .ai-popup-content {
     background: white;
-    padding: 30px;
+    padding: 40px;
     border-radius: 20px;
     text-align: left;
-    max-width: 500px;
+    max-width: 600px;
+    max-height: 80vh;
     margin: 20px;
     position: relative;
+    overflow-y: auto;
 }
 
 .ai-popup-content h3 {
     color: #2c5530;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     text-align: center;
+    font-size: 1.4em;
+}
+
+.ai-popup-content h4 {
+    color: #48a87b;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 1.2em;
 }
 
 .ai-popup-content p {
@@ -116,11 +126,32 @@ body {
 
 .ai-popup-content ul {
     margin-left: 20px;
+    margin-bottom: 20px;
     color: #333;
 }
 
 .ai-popup-content li {
     margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.ai-popup-content a {
+    color: #3087d4;
+    text-decoration: none;
+}
+
+.ai-popup-content a:hover {
+    text-decoration: underline;
+}
+
+.ai-popup-content em {
+    font-style: italic;
+    color: #666;
+}
+
+.ai-popup-content strong {
+    font-weight: bold;
+    color: #2c5530;
 }
 
 .close-popup {
