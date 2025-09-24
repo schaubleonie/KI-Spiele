@@ -40,16 +40,19 @@ body {
 .footer {
     position: absolute;
     bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
     text-align: center;
-    padding: 10px 0;
-    background: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.95);
     font-size: 0.9em;
     color: #666;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 15px;
+    box-sizing: border-box;
 }
 
 .info-icon {
