@@ -35,16 +35,6 @@
         }
 
         /* Startscreen */
-        .market-decoration {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
         .market-stalls {
             display: flex;
             justify-content: space-around;
@@ -66,7 +56,7 @@
         }
 
         .stall::before {
-            display: none; /* Versteckt das braune Dach-Element */
+            display: none; /* Hide the roof element since it's now part of the image */
         }
 
         .welcome-box {
@@ -281,6 +271,27 @@
         }
 
         /* Distortion effects */
+        .blur { filter: blur(4px); }
+        .dark { filter: brightness(0.3) contrast(1.5); }
+        .pixelated { 
+            filter: blur(1px);
+            image-rendering: pixelated;
+            transform: scale(0.8);
+        }
+        .rotated { transform: rotate(15deg); filter: blur(1px); }
+        .shadow { 
+            filter: drop-shadow(20px 20px 10px rgba(0,0,0,0.8)) brightness(0.6); 
+        }
+        .oversaturated { filter: saturate(3) hue-rotate(30deg) blur(2px); }
+        .cropped { 
+            clip-path: circle(60% at 30% 30%); 
+            filter: blur(1px);
+        }
+        .noisy { 
+            filter: contrast(1.5) brightness(0.8) blur(2px); 
+            position: relative;
+        }
+
         .popup {
             position: fixed;
             top: 0;
@@ -388,8 +399,19 @@
 <body>
     <!-- Startscreen -->
     <div class="screen active" id="start-screen">
+        <div class="market-decoration">
+            <div class="floating-item" style="top: 10%; left: 10%; animation-delay: 0s;">🍎</div>
+            <div class="floating-item" style="top: 20%; right: 15%; animation-delay: 1s;">🥕</div>
+            <div class="floating-item" style="top: 15%; left: 60%; animation-delay: 2s;">🍞</div>
+            <div class="floating-item" style="top: 30%; left: 80%; animation-delay: 3s;">🥛</div>
+            <div class="floating-item" style="top: 40%; left: 20%; animation-delay: 4s;">🧀</div>
+            <div class="floating-item" style="top: 25%; right: 30%; animation-delay: 5s;">🍌</div>
+            <div class="floating-item" style="top: 50%; left: 70%; animation-delay: 1.5s;">🥬</div>
+            <div class="floating-item" style="top: 35%; right: 10%; animation-delay: 2.5s;">🥚</div>
+        </div>
         
         <div class="market-stalls">
+            <div class="stall"></div>
             <div class="stall"></div>
             <div class="stall"></div>
             <div class="stall"></div>
@@ -499,6 +521,11 @@
 
     <!-- Next Game Screen -->
     <div class="screen" id="next-game">
+        <div class="market-decoration">
+            <div class="floating-item" style="top: 10%; left: 10%; animation-delay: 0s;">🍎</div>
+            <div class="floating-item" style="top: 20%; right: 15%; animation-delay: 1s;">🥕</div>
+            <div class="floating-item" style="top: 15%; left: 60%; animation-delay: 2s;">🍞</div>
+        </div>
         
         <div class="container">
             <div class="welcome-box">
@@ -523,7 +550,7 @@
         </div>
     </div>
 
-      <script>
+    <script>
         // Game data - using exact filenames from your GitHub
         const foodItems = [
             { id: 'Apfel', category: 'fruits', name: 'Apfel', hasBlurred: true },
@@ -618,6 +645,8 @@
                 img.style.height = '100%';
                 img.style.objectFit = 'cover';
                 img.style.borderRadius = '15px';
+                img.draggable = false; // Prevent image from being draggable separately
+                img.style.pointerEvents = 'none'; // Let events pass through to parent div
                 
                 itemElement.appendChild(img);
                 container.appendChild(itemElement);
@@ -641,7 +670,9 @@
         }
 
         function handleDragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.dataset.itemId);
+            // Check if we're dragging the container or the image inside
+            const itemId = e.target.dataset.itemId || e.target.parentElement.dataset.itemId;
+            e.dataTransfer.setData('text/plain', itemId);
         }
 
         function handleDragOver(e) {
