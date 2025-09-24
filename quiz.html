@@ -50,30 +50,56 @@
     <!-- Quiz Game -->
     <div class="screen" id="quiz-game">
         <div class="container">
+            <div style="display: flex; gap: 30px; align-items: flex-start;">
+                <!-- Main Quiz Area -->
+                <div class="game-container" style="flex: 2;">
+                    <div class="quiz-header">
+                        <div class="question-counter" id="question-counter">Frage 1 von 15</div>
+                        <div class="points-display" id="points-display">0 Punkte</div>
+                    </div>
+
+                    <div class="question-container">
+                        <div class="question-text" id="question-text"></div>
+                        <div class="answers-grid" id="answers-grid"></div>
+                    </div>
+
+                    <div class="joker-section">
+                        <button class="joker-btn" id="fifty-fifty-btn">50:50 Joker</button>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn secondary" id="stop-btn">Aufhören</button>
+                        <button class="btn" id="final-answer-btn" style="display: none;">Antwort bestätigen</button>
+                    </div>
+                </div>
+
+                <!-- Points Ladder Sidebar -->
+                <div class="points-ladder" id="points-ladder" style="flex: 1; max-width: 250px;">
+                    <h3>Punkteleiter</h3>
+                    <div id="ladder-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Explanation Screen -->
+    <div class="screen" id="explanation-screen">
+        <div class="container">
             <div class="game-container">
                 <div class="quiz-header">
-                    <div class="question-counter" id="question-counter">Frage 1 von 15</div>
-                    <div class="points-display" id="points-display">0 Punkte</div>
+                    <div class="question-counter" id="explanation-counter">Frage 1 von 15</div>
+                    <div class="points-display" id="explanation-points">0 Punkte</div>
                 </div>
 
-                <div class="question-container">
-                    <div class="question-text" id="question-text"></div>
-                    <div class="answers-grid" id="answers-grid"></div>
-                </div>
-
-                <div class="joker-section">
-                    <button class="joker-btn" id="fifty-fifty-btn">50:50 Joker</button>
+                <div class="question-container" style="border-left: 5px solid #4CAF50;">
+                    <h3 style="color: #4CAF50; margin-bottom: 20px;" id="explanation-result">Richtig!</h3>
+                    <div style="font-size: 1.1em; line-height: 1.6; color: #333;" id="explanation-text"></div>
                 </div>
 
                 <div class="action-buttons">
-                    <button class="btn secondary" id="stop-btn">Aufhören</button>
-                    <button class="btn" id="final-answer-btn" style="display: none;">Antwort bestätigen</button>
+                    <button class="btn" id="continue-btn">Weiter zur nächsten Frage</button>
+                    <button class="btn" id="finish-quiz-btn" style="display: none;">Quiz beenden</button>
                 </div>
-            </div>
-
-            <div class="points-ladder" id="points-ladder">
-                <h3>Punkteleiter</h3>
-                <div id="ladder-content"></div>
             </div>
         </div>
     </div>
@@ -238,6 +264,10 @@
             document.getElementById('stop-btn').addEventListener('click', stopGame);
             document.getElementById('final-answer-btn').addEventListener('click', submitAnswer);
             
+            // New explanation screen controls
+            document.getElementById('continue-btn').addEventListener('click', nextQuestion);
+            document.getElementById('finish-quiz-btn').addEventListener('click', () => endGame(true));
+            
             // Result screen
             document.getElementById('play-again-btn').addEventListener('click', resetGame);
             
@@ -314,15 +344,7 @@
             setTimeout(() => {
                 if (isCorrect) {
                     gameState.currentPoints = question.points;
-                    gameState.currentQuestion++;
-                    
-                    if (gameState.currentQuestion >= questions.length) {
-                        // Game won!
-                        endGame(true);
-                    } else {
-                        // Next question
-                        nextQuestion();
-                    }
+                    showExplanation(true);
                 } else {
                     // Game over
                     endGame(false);
@@ -330,10 +352,41 @@
             }, 2000);
         }
 
+        function showExplanation(isCorrect) {
+            const question = questions[gameState.currentQuestion];
+            
+            // Update explanation screen
+            document.getElementById('explanation-counter').textContent = `Frage ${gameState.currentQuestion + 1} von ${questions.length}`;
+            document.getElementById('explanation-points').textContent = `${gameState.currentPoints} Punkte`;
+            document.getElementById('explanation-result').textContent = isCorrect ? 'Richtig!' : 'Falsch!';
+            document.getElementById('explanation-result').style.color = isCorrect ? '#4CAF50' : '#dc3545';
+            document.getElementById('explanation-text').textContent = question.explanation;
+            
+            // Show/hide buttons based on progress
+            if (gameState.currentQuestion >= questions.length - 1) {
+                document.getElementById('continue-btn').style.display = 'none';
+                document.getElementById('finish-quiz-btn').style.display = 'inline-block';
+            } else {
+                document.getElementById('continue-btn').style.display = 'inline-block';
+                document.getElementById('finish-quiz-btn').style.display = 'none';
+            }
+            
+            showScreen('explanation-screen');
+        }
+
         function nextQuestion() {
-            gameState.selectedAnswer = null;
-            renderQuestion();
-            updateDisplay();
+            gameState.currentQuestion++;
+            
+            if (gameState.currentQuestion >= questions.length) {
+                // Game won!
+                endGame(true);
+            } else {
+                // Prepare next question
+                gameState.selectedAnswer = null;
+                renderQuestion();
+                updateDisplay();
+                showScreen('quiz-game');
+            }
         }
 
         function useFiftyFifty() {
