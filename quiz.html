@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wer wird KI-Profi - Markthalle Basel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Start Screen -->
+    <div class="screen active" id="start-screen">
+        <div class="market-stalls">
+            <div class="stall"></div>
+            <div class="stall"></div>
+            <div class="stall"></div>
+        </div>
+
+        <div class="container">
+            <div class="welcome-box">
+                <h1>Wer wird KI-Profi?</h1>
+                <div class="subtitle">KI-Wissen für Neulinge</div>
+                <div class="description">Teste dein Wissen rund um Künstliche Intelligenz</div>
+                <button class="btn" id="start-quiz-btn">Quiz starten</button>
+                <button class="btn secondary" id="rules-btn">Spielregeln</button>
+                <button class="btn secondary" onclick="window.location.href='index.html'">Zurück zum Start</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rules Screen -->
+    <div class="screen" id="rules-screen">
+        <button class="btn back-btn" id="back-to-start">← Zurück</button>
+        <div class="container">
+            <div class="game-container">
+                <div class="market-frame">
+                    <h2 style="color: #2c5530; margin-bottom: 20px;">Spielregeln</h2>
+                    <div style="text-align: left; font-size: 1.1em; line-height: 1.6; color: #333;">
+                        <p><strong>Ziel:</strong> Beantworte 15 Fragen richtig und werde zum KI-Profi!</p><br>
+                        <p><strong>Punkte:</strong> Jede richtige Antwort bringt dir Punkte. Je schwieriger die Frage, desto mehr Punkte!</p><br>
+                        <p><strong>Joker:</strong> Du hast einen 50:50-Joker. Dieser eliminiert zwei falsche Antworten.</p><br>
+                        <p><strong>Stoppen:</strong> Du kannst jederzeit aufhören und deine Punkte mitnehmen.</p><br>
+                        <p><strong>Falsche Antwort:</strong> Bei einer falschen Antwort ist das Spiel vorbei.</p>
+                    </div>
+                    <button class="btn" id="start-from-rules" style="margin-top: 20px;">Los geht's!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Game -->
+    <div class="screen" id="quiz-game">
+        <div class="container">
+            <div class="game-container">
+                <div class="quiz-header">
+                    <div class="question-counter" id="question-counter">Frage 1 von 15</div>
+                    <div class="points-display" id="points-display">0 Punkte</div>
+                </div>
+
+                <div class="question-container">
+                    <div class="question-text" id="question-text"></div>
+                    <div class="answers-grid" id="answers-grid"></div>
+                </div>
+
+                <div class="joker-section">
+                    <button class="joker-btn" id="fifty-fifty-btn">50:50 Joker</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn secondary" id="stop-btn">Aufhören</button>
+                    <button class="btn" id="final-answer-btn" style="display: none;">Antwort bestätigen</button>
+                </div>
+            </div>
+
+            <div class="points-ladder" id="points-ladder">
+                <h3>Punkteleiter</h3>
+                <div id="ladder-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="screen" id="result-screen">
+        <div class="container">
+            <div class="game-container result-screen">
+                <div class="final-score" id="final-score">0</div>
+                <div class="achievement" id="achievement-text"></div>
+                <div style="font-size: 1.1em; color: #666; margin: 30px 0;" id="result-explanation"></div>
+                <div class="action-buttons">
+                    <button class="btn" id="play-again-btn">Nochmal spielen</button>
+                    <button class="btn secondary" onclick="window.location.href='sortierung.html'">Marktvorbereitung</button>
+                    <button class="btn secondary" onclick="window.location.href='index.html'">Zurück zum Start</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const questions = [
+            // Level 1-5: Grundlagen (100-500 Punkte)
+            {
+                question: "Was ist in der KI-Welt ein 'Algorithmus' am ehesten vergleichbar?",
+                answers: ["Ein Kochrezept", "Ein Verkäufer", "Ein Computer", "Ein Kunde"],
+                correct: 0,
+                points: 100,
+                explanation: "Ein Algorithmus ist wie ein Rezept - eine Schritt-für-Schritt-Anleitung, die erklärt, wie etwas gemacht werden soll."
+            },
+            {
+                question: "Wenn eine KI lernt, Äpfel zu erkennen, womit füttern wir sie hauptsächlich?",
+                answers: ["Mit echten Äpfeln", "Mit Bildern von Äpfeln", "Mit Apfelsaft", "Mit Texten über Äpfel"],
+                correct: 1,
+                points: 200,
+                explanation: "KI lernt hauptsächlich durch Daten - in diesem Fall Tausende von Bildern mit Äpfeln, damit sie das Muster erkennt."
+            },
+            {
+                question: "Was solltest du NICHT in einem KI-Chat eingeben?",
+                answers: ["Deine Hobbys", "Dein Passwort", "Deine Lieblingsspeise", "Deine Fragen"],
+                correct: 1,
+                points: 300,
+                explanation: "Persönliche, sensible Daten wie Passwörter sollten nie in KI-Chats eingegeben werden - sie könnten gespeichert oder missbraucht werden."
+            },
+            {
+                question: "Wenn eine KI dir eine Antwort gibt, solltest du:",
+                answers: ["Ihr blind vertrauen", "Nie nachprüfen", "Die Antwort hinterfragen", "Sofort weiterfragen"],
+                correct: 2,
+                points: 400,
+                explanation: "KI kann Fehler machen oder 'halluzinieren' - erfundene Fakten als wahr darstellen. Immer kritisch prüfen!"
+            },
+            {
+                question: "Was ist ein 'Chatbot' in der Markthalle der KI?",
+                answers: ["Ein Roboter-Verkäufer", "Ein Programm für Gespräche", "Ein Einkaufswagen", "Ein Preisschild"],
+                correct: 1,
+                points: 500,
+                explanation: "Ein Chatbot ist ein Computerprogramm, das mit Menschen in natürlicher Sprache kommunizieren kann."
+            },
+
+            // Level 6-10: Intermediate (750-2000 Punkte)  
+            {
+                question: "Wenn eine KI nur mit Bildern von grünen Äpfeln trainiert wurde, was passiert bei roten Äpfeln?",
+                answers: ["Sie erkennt sie perfekt", "Sie könnte sie falsch einordnen", "Sie lernt automatisch dazu", "Sie fragt nach"],
+                correct: 1,
+                points: 750,
+                explanation: "Das ist 'Bias' - wenn Trainingsdaten einseitig sind, macht die KI bei anderen Varianten Fehler."
+            },
+            {
+                question: "Warum verbraucht KI-Training viel Strom?",
+                answers: ["Computer müssen sehr schnell rechnen", "KI braucht Licht zum Sehen", "Daten sind schwer", "KI muss geheizt werden"],
+                correct: 0,
+                points: 1000,
+                explanation: "Das Training großer KI-Modelle erfordert massive Rechenleistung von Tausenden Computern - das verbraucht enorm viel Energie."
+            },
+            {
+                question: "Was ist eine 'KI-Halluzination'?",
+                answers: ["KI sieht Dinge", "KI erfindet falsche Fakten", "KI träumt", "KI wird müde"],
+                correct: 1,
+                points: 1250,
+                explanation: "KI-Halluzination bedeutet, dass die KI selbstbewusst falsche oder erfundene Informationen als Fakten präsentiert."
+            },
+            {
+                question: "Welche KI-Anwendung hilft beim nachhaltigen Einkaufen?",
+                answers: ["Automatische Preisvergleiche", "Erkennung von Lebensmittelverschwendung", "Schnellere Kassen", "Lautere Musik"],
+                correct: 1,
+                points: 1500,
+                explanation: "KI kann helfen, Lebensmittelverschwendung zu reduzieren, indem sie Verbrauchsmuster analysiert und optimiert."
+            },
+            {
+                question: "Was passiert, wenn wir uns zu sehr auf KI verlassen?",
+                answers: ["Wir werden schlauer", "Wir könnten verlernen, selbst zu denken", "Nichts Schlimmes", "Wir sparen Zeit"],
+                correct: 1,
+                points: 2000,
+                explanation: "Übermäßige KI-Nutzung kann dazu führen, dass wir eigene Denkfähigkeiten vernachlässigen - wie ein 'mentaler Muskel', der schrumpft."
+            },
+
+            // Level 11-15: Advanced (3000-16000 Punkte)
+            {
+                question: "Was versteht man unter 'maschinellem Lernen'?",
+                answers: ["Roboter lernen laufen", "Computer lernen aus Daten", "KI geht zur Schule", "Menschen lehren Maschinen"],
+                correct: 1,
+                points: 3000,
+                explanation: "Maschinelles Lernen bedeutet, dass Computer durch Daten selbstständig Muster erkennen und Entscheidungen treffen lernen."
+            },
+            {
+                question: "Welches Problem entsteht, wenn KI-Systeme nur mit Daten von jungen Menschen trainiert werden?",
+                answers: ["Sie werden zu schnell", "Sie diskriminieren Ältere", "Sie werden kindisch", "Sie altern nicht"],
+                correct: 1,
+                points: 4000,
+                explanation: "Das führt zu Altersdiskriminierung - die KI funktioniert schlecht für ältere Menschen, da sie deren Bedürfnisse nicht 'kennt'."
+            },
+            {
+                question: "Wie kann KI in der Medizin helfen UND gleichzeitig riskant sein?",
+                answers: ["Schnelle Diagnosen, aber Fehldiagnosen möglich", "Heilt alles, macht aber süchtig", "Ist billig, aber langsam", "Funktioniert nur nachts"],
+                correct: 0,
+                points: 6000,
+                explanation: "KI kann Krankheiten schnell erkennen, aber falsche Diagnosen können gefährlich sein - besonders bei seltenen Krankheiten."
+            },
+            {
+                question: "Was ist der größte Umwelteffekt von großen KI-Modellen?",
+                answers: ["Sie produzieren Müll", "Sie verbrauchen viel Wasser für Kühlung", "Sie machen Lärm", "Sie riechen schlecht"],
+                correct: 1,
+                points: 8000,
+                explanation: "Große Rechenzentren für KI benötigen massive Kühlung - ein einziges großes Modell kann Millionen Liter Wasser verbrauchen."
+            },
+            {
+                question: "Warum ist 'Transparenz' bei KI-Entscheidungen wichtig?",
+                answers: ["Damit sie hübsch aussehen", "Um nachvollziehen zu können, wie Entscheidungen entstehen", "Für bessere Beleuchtung", "Damit sie schneller werden"],
+                correct: 1,
+                points: 16000,
+                explanation: "Bei wichtigen Entscheidungen (Kredite, Medizin, Justiz) müssen wir verstehen können, warum eine KI so entschieden hat - das schafft Vertrauen und ermöglicht Korrekturen."
+            }
+        ];
+
+        const pointsLadder = [100, 200, 300, 400, 500, 750, 1000, 1250, 1500, 2000, 3000, 4000, 6000, 8000, 16000];
+
+        let gameState = {
+            currentQuestion: 0,
+            currentPoints: 0,
+            selectedAnswer: null,
+            fiftyFiftyUsed: false,
+            gameEnded: false
+        };
+
+        // Screen management
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Initialize game
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation
+            document.getElementById('start-quiz-btn').addEventListener('click', startQuiz);
+            document.getElementById('rules-btn').addEventListener('click', () => showScreen('rules-screen'));
+            document.getElementById('back-to-start').addEventListener('click', () => showScreen('start-screen'));
+            document.getElementById('start-from-rules').addEventListener('click', startQuiz);
+            
+            // Game controls
+            document.getElementById('fifty-fifty-btn').addEventListener('click', useFiftyFifty);
+            document.getElementById('stop-btn').addEventListener('click', stopGame);
+            document.getElementById('final-answer-btn').addEventListener('click', submitAnswer);
+            
+            // Result screen
+            document.getElementById('play-again-btn').addEventListener('click', resetGame);
+            
+            renderPointsLadder();
+        });
+
+        function startQuiz() {
+            resetGameState();
+            showScreen('quiz-game');
+            renderQuestion();
+            updateDisplay();
+        }
+
+        function resetGameState() {
+            gameState = {
+                currentQuestion: 0,
+                currentPoints: 0,
+                selectedAnswer: null,
+                fiftyFiftyUsed: false,
+                gameEnded: false
+            };
+            document.getElementById('fifty-fifty-btn').disabled = false;
+        }
+
+        function renderQuestion() {
+            const question = questions[gameState.currentQuestion];
+            
+            document.getElementById('question-text').textContent = question.question;
+            
+            const answersGrid = document.getElementById('answers-grid');
+            answersGrid.innerHTML = '';
+            
+            question.answers.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = `${String.fromCharCode(65 + index)}: ${answer}`;
+                btn.onclick = () => selectAnswer(index);
+                btn.dataset.index = index;
+                answersGrid.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(index) {
+            // Clear previous selection
+            document.querySelectorAll('.answer-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Select new answer
+            document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+            gameState.selectedAnswer = index;
+            
+            document.getElementById('final-answer-btn').style.display = 'inline-block';
+        }
+
+        function submitAnswer() {
+            if (gameState.selectedAnswer === null) return;
+            
+            const question = questions[gameState.currentQuestion];
+            const isCorrect = gameState.selectedAnswer === question.correct;
+            
+            // Show correct/wrong answers
+            document.querySelectorAll('.answer-btn').forEach((btn, index) => {
+                btn.onclick = null; // Disable clicks
+                if (index === question.correct) {
+                    btn.classList.add('correct');
+                } else if (index === gameState.selectedAnswer && !isCorrect) {
+                    btn.classList.add('wrong');
+                }
+            });
+            
+            document.getElementById('final-answer-btn').style.display = 'none';
+            
+            setTimeout(() => {
+                if (isCorrect) {
+                    gameState.currentPoints = question.points;
+                    gameState.currentQuestion++;
+                    
+                    if (gameState.currentQuestion >= questions.length) {
+                        // Game won!
+                        endGame(true);
+                    } else {
+                        // Next question
+                        nextQuestion();
+                    }
+                } else {
+                    // Game over
+                    endGame(false);
+                }
+            }, 2000);
+        }
+
+        function nextQuestion() {
+            gameState.selectedAnswer = null;
+            renderQuestion();
+            updateDisplay();
+        }
+
+        function useFiftyFifty() {
+            if (gameState.fiftyFiftyUsed) return;
+            
+            const question = questions[gameState.currentQuestion];
+            const correctIndex = question.correct;
+            const incorrectIndices = [0, 1, 2, 3].filter(i => i !== correctIndex);
+            
+            // Randomly eliminate 2 wrong answers
+            const toEliminate = incorrectIndices.sort(() => Math.random() - 0.5).slice(0, 2);
+            
+            toEliminate.forEach(index => {
+                const btn = document.querySelector(`[data-index="${index}"]`);
+                btn.classList.add('eliminated');
+                btn.onclick = null;
+            });
+            
+            gameState.fiftyFiftyUsed = true;
+            document.getElementById('fifty-fifty-btn').disabled = true;
+        }
+
+        function stopGame() {
+            const currentPoints = gameState.currentQuestion > 0 ? questions[gameState.currentQuestion - 1].points : 0;
+            gameState.currentPoints = currentPoints;
+            endGame(false, true);
+        }
+
+        function endGame(won, stopped = false) {
+            gameState.gameEnded = true;
+            
+            let achievementText = '';
+            let explanationText = '';
+            
+            if (won) {
+                achievementText = '🎉 Herzlichen Glückwunsch! Du bist jetzt ein KI-Profi!';
+                explanationText = 'Du hast alle 15 Fragen richtig beantwortet und das höchste Level erreicht. Dein Wissen über KI ist beeindruckend!';
+            } else if (stopped) {
+                achievementText = `Gut gespielt! Du hast ${gameState.currentPoints} Punkte sicher genommen.`;
+                explanationText = 'Manchmal ist es klug aufzuhören, wenn man sich unsicher ist. Du kennst deine Grenzen!';
+            } else {
+                const questionNum = gameState.currentQuestion + 1;
+                achievementText = `Spiel beendet bei Frage ${questionNum}`;
+                explanationText = `${questions[gameState.currentQuestion].explanation}`;
+            }
+            
+            document.getElementById('final-score').textContent = gameState.currentPoints + ' Punkte';
+            document.getElementById('achievement-text').textContent = achievementText;
+            document.getElementById('result-explanation').textContent = explanationText;
+            
+            showScreen('result-screen');
+        }
+
+        function updateDisplay() {
+            document.getElementById('question-counter').textContent = `Frage ${gameState.currentQuestion + 1} von ${questions.length}`;
+            document.getElementById('points-display').textContent = `${gameState.currentPoints} Punkte`;
+            updatePointsLadder();
+        }
+
+        function renderPointsLadder() {
+            const ladder = document.getElementById('ladder-content');
+            ladder.innerHTML = '';
+            
+            pointsLadder.slice().reverse().forEach((points, index) => {
+                const div = document.createElement('div');
+                div.className = 'ladder-item';
+                div.innerHTML = `<span>Frage ${15 - index}</span><span>${points} Punkte</span>`;
+                ladder.appendChild(div);
+            });
+        }
+
+        function updatePointsLadder() {
+            const items = document.querySelectorAll('.ladder-item');
+            items.forEach((item, index) => {
+                const questionNum = 15 - index;
+                item.classList.remove('current', 'completed');
+                
+                if (questionNum === gameState.currentQuestion + 1) {
+                    item.classList.add('current');
+                } else if (questionNum <= gameState.currentQuestion) {
+                    item.classList.add('completed');
+                }
+            });
+        }
+
+        function resetGame() {
+            resetGameState();
+            showScreen('quiz-game');
+            renderQuestion();
+            updateDisplay();
+            renderPointsLadder();
+        }
+    </script>
+</body>
+</html>
