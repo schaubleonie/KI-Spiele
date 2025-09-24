@@ -321,10 +321,20 @@
             let resultText = '';
             
             if (wasEasy) {
-                if (isHighScore) {
-                    resultText = `Du hast fast alles korrekt erkannt! Das zeigt, wie stark die menschliche Mustererkennung ist. Unser Gehirn ergänzt fehlende Informationen automatisch und gleicht sie mit Erfahrungen ab.
+                if (percentage === 100) {
+                    resultText = `Gut gemacht! Du hast alles richtig erkannt!
 
-Für Künstliche Intelligenz ist das oft schwieriger. Sie erkennt Muster nur auf Basis der Daten, mit denen sie trainiert wurde. Wenn die Trainingsdaten lückenhaft, einseitig oder falsch sind, übernimmt die KI diese Fehler, denn sie hat kein Verständnis für den Inhalt.
+💡 Wusstest du, dass KI oft Schwierigkeiten mit unscharfen oder unvollständigen Bildern hat? Die menschliche Mustererkennung ist erstaunlich - unser Gehirn ergänzt fehlende Informationen automatisch und gleicht sie mit unseren Erfahrungen ab.
+
+Für Künstliche Intelligenz ist das schwieriger. Sie erkennt Muster nur auf Basis der Daten, mit denen sie trainiert wurde. Wenn die Trainingsdaten lückenhaft, einseitig oder falsch sind, übernimmt die KI diese Fehler, denn sie hat kein Verständnis für den Inhalt.
+
+Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie er aussieht, dann würde sie ihn auch nicht erkennen.`;
+                } else if (isHighScore) {
+                    resultText = `Gut gemacht! Du hast fast alles korrekt erkannt!
+
+💡 Wusstest du, dass KI oft Schwierigkeiten mit unscharfen oder unvollständigen Bildern hat? Die menschliche Mustererkennung ist erstaunlich - unser Gehirn ergänzt fehlende Informationen automatisch und gleicht sie mit unseren Erfahrungen ab.
+
+Für Künstliche Intelligenz ist das schwieriger. Sie erkennt Muster nur auf Basis der Daten, mit denen sie trainiert wurde. Wenn die Trainingsdaten lückenhaft, einseitig oder falsch sind, übernimmt die KI diese Fehler, denn sie hat kein Verständnis für den Inhalt.
 
 Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie er aussieht, dann würde sie ihn auch nicht erkennen.`;
                 } else {
@@ -385,16 +395,6 @@ Hat man einer KI beispielsweise noch nie erklärt was ein Brokkoli ist und wie e
                 label.style.fontSize = '0.8em';
                 label.style.marginTop = '5px';
                 label.style.color = isCorrect ? '#4CAF50' : '#f44336';
-                
-                // Add hint for items without blur
-                if (!item.hasBlurred) {
-                    const hint = document.createElement('p');
-                    hint.textContent = '(immer scharf)';
-                    hint.style.fontSize = '0.7em';
-                    hint.style.color = '#666';
-                    hint.style.fontStyle = 'italic';
-                    itemContainer.appendChild(hint);
-                }
                 
                 itemContainer.appendChild(itemElement);
                 itemContainer.appendChild(label);
