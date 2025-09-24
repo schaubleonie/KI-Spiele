@@ -15,6 +15,11 @@
             <div class="stall"></div>
         </div>
 
+        <div class="footer">
+            <span>KI spielerisch lernen | AI Open House @Markthalle Basel | September 2025 | by Léonie Schaub</span>
+            <div class="info-icon" onclick="showAIPopup()">i</div>
+        </div>
+
         <div class="container">
             <div class="welcome-box">
                 <h1>Wer wird KI-Profi?</h1>
@@ -117,6 +122,19 @@
                     <button class="btn secondary" onclick="window.location.href='index.html'">Zurück zum Start</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- AI Declaration Popup -->
+    <div class="ai-popup" id="ai-popup">
+        <div class="ai-popup-content">
+            <button class="close-popup" onclick="hideAIPopup()">&times;</button>
+            <h3>KI-Deklaration</h3>
+            <p>Zur Erstellung dieser Spiele wurden verschiedene KI-Tools verwendet:</p>
+            <ul>
+                <li>Claude AI für Coding</li>
+                <li>ChatGPT zur Bildgenerierung und Textkorrektur</li>
+            </ul>
         </div>
     </div>
 
@@ -269,9 +287,25 @@
             document.getElementById('finish-quiz-btn').addEventListener('click', () => endGame(true));
             
             // Result screen
-            document.getElementById('play-again-btn').addEventListener('click', resetGame);
+                            document.getElementById('play-again-btn').addEventListener('click', resetGame);
             
             renderPointsLadder();
+        });
+
+        function showAIPopup() {
+            document.getElementById('ai-popup').classList.add('active');
+        }
+
+        function hideAIPopup() {
+            document.getElementById('ai-popup').classList.remove('active');
+        }
+
+        // Close popup when clicking outside
+        document.addEventListener('click', function(e) {
+            const popup = document.getElementById('ai-popup');
+            if (e.target === popup) {
+                hideAIPopup();
+            }
         });
 
         function startQuiz() {
